@@ -1,10 +1,29 @@
 import graphene
 from graphene_django import DjangoObjectType
+from django.db.models import Sum
 from products.models import Product
+from customers.models import Customer
+from orders.models import Order
 
 class ProductType(DjangoObjectType):
     class Meta:
         model = Product
+
+class Query(graphene.ObjectType):
+    # CRM Report Queries
+    total_customers = graphene.Int()
+    total_orders = graphene.Int()
+    total_revenue = graphene.Float()
+    
+    def resolve_total_customers(self, info):
+        return Customer.objects.count()
+    
+    def resolve_total_orders(self, info):
+        return Order.objects.count()
+    
+    def resolve_total_revenue(self, info):
+        result = Order.objects.aggregate(total=Sum('total_amount'))
+        return result['total'] or 0.0
 
 class UpdateLowStockProducts(graphene.Mutation):
     class Arguments:
@@ -33,4 +52,4 @@ class UpdateLowStockProducts(graphene.Mutation):
 class Mutation(graphene.ObjectType):
     update_low_stock_products = UpdateLowStockProducts.Field()
 
-schema = graphene.Schema(mutation=Mutation)
+schema = graphene.Schema(query=Query, mutation=Mutation)
