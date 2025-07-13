@@ -92,6 +92,6 @@ GRAPHENE = {
 
 # Cron Jobs Configuration
 CRONJOBS = [
-    ('*/5 * * * *', 'crm.cron.log_crm_heartbeat'),
-    ('0 */12 * * *', 'crm.cron.update_low_stock'),
+    ('*/5 * * * *', 'crm.cron.log_crm_heartbeat'),  # Every 5 minutes
+    ('0 */12 * * *', 'crm.cron.update_low_stock'),  # Every 12 hours
 ]

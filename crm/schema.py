@@ -46,9 +46,10 @@ class UpdateLowStockProducts(graphene.Mutation):
         updated = []
         
         for product in low_stock_products:
+            original_stock = product.stock
             product.stock += 10
             product.save()
-            updated.append(f"{product.name} (New stock: {product.stock})")
+            updated.append(f"{product.name} (Stock: {original_stock}→{product.stock})")
         
         return UpdateLowStockProducts(
             success=True,

@@ -20,10 +20,13 @@ def log_crm_heartbeat():
 
 def update_low_stock():
     """Update low stock products every 12 hours"""
-    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     try:
-        transport = RequestsHTTPTransport(url="http://localhost:8000/graphql")
+        transport = RequestsHTTPTransport(
+            url="http://localhost:8000/graphql",
+            headers={"Content-Type": "application/json"}
+        )
         client = Client(transport=transport, fetch_schema_from_transport=True)
         
         mutation = gql("""
@@ -37,13 +40,14 @@ def update_low_stock():
         """)
         
         result = client.execute(mutation)
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         with open("/tmp/low_stock_updates_log.txt", "a") as f:
             if result['updateLowStockProducts']['success']:
                 f.write(f"[{timestamp}] {result['updateLowStockProducts']['message']}\n")
                 for product in result['updateLowStockProducts']['updatedProducts']:
                     f.write(f"  - {product}\n")
+            else:
+                f.write(f"[{timestamp}] Stock update failed\n")
     except Exception as e:
         with open("/tmp/low_stock_updates_log.txt", "a") as f:
             f.write(f"[{timestamp}] Error updating stock: {str(e)}\n")
